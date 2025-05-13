@@ -1,2 +1,3 @@
 .venv
 clivro.db
+.env
