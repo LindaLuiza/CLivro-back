@@ -6,6 +6,7 @@ from jose import jwt, JWTError
 from pydantic import EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from uuid_extensions import uuid7
 
 from clivro.database import get_db
 from clivro.settings import settings
@@ -22,7 +23,8 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/token")
 def create_login(data: UserIn, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(data.password)
     try:
-        user = UserModel(name=data.name, email=data.email, username=data.username, hashed_password=hashed_password)
+        user = UserModel(id=uuid7(), name=data.name, email=data.email, username=data.username,
+                         hashed_password=hashed_password)
         db.add(user)
         db.commit()
     except IntegrityError as e:
