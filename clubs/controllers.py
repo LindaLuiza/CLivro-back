@@ -60,6 +60,7 @@ def update_club(club_id: UUID, data: ClubIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str('Club does not exist'))
     club.name = data.name
     club.description = data.description
+    club.updated_at = datetime.utcnow()
     db.commit()
     return club
 
