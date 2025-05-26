@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import FastAPI, status, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from clivro.database import engine, Base, get_db
@@ -14,6 +15,14 @@ from users.utils import get_current_user
 app = FastAPI()
 
 Base.metadata.create_all(bind=engine)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(users_router, prefix="/users", tags=["users"])
 app.include_router(clubs_router, prefix="/clubs", tags=["clubs"])
