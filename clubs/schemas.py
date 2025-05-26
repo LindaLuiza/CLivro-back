@@ -10,7 +10,7 @@ class ClubIn(BaseModel):
 class ClubOut(BaseModel):
     id: UUID7
     name: str
-    description: str
+    description: str | None
     owner_id: UUID7
     created_at: datetime
     updated_at: datetime | None
