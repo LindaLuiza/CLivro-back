@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -55,6 +56,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 @router.get("/me", response_model=UserOut)
 def read_users_me(current_user: UserModel = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/{user_id}", response_model=UserOut)
+def get_user(user_id: UUID, db: Session = Depends(get_db)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    return user
 
 
 @router.put("/me")
