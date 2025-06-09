@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +9,7 @@ from uuid import UUID
 
 from clivro.database import get_db
 
+from members.models import Member as MemberModel
 from users.models import User as UserModel
 from users.utils import get_current_user
 
@@ -28,6 +30,8 @@ def create_club(club: ClubIn, user: UserModel = Depends(get_current_user), db: S
     try:
         club = ClubModel(id=uuid7(), name=club.name, description=club.description, owner_id=str(user.id))
         db.add(club)
+        member = MemberModel(club_id=club.id, user_id=user.id)
+        db.add(member)
         db.commit()
     except IntegrityError as e:
         db.rollback()
@@ -42,6 +46,17 @@ def create_club(club: ClubIn, user: UserModel = Depends(get_current_user), db: S
 @router.get('/owner', response_model=list[ClubOut], status_code=status.HTTP_200_OK)
 def get_club_by_owner_id(user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
     clubs = db.query(ClubModel).filter(ClubModel.owner_id == str(user.id)).all()
+    return clubs
+
+
+@router.get('/my-clubs', response_model=List[ClubOut], status_code=status.HTTP_200_OK)
+def get_my_clubs(user: UserModel = Depends(get_current_user), db: Session = Depends(get_db)):
+    members = db.query(MemberModel).filter(MemberModel.user_id == user.id).all()
+    if len(members) == 0:
+        return []
+    clubs = []
+    for member in members:
+        clubs.append(member.clubs)
     return clubs
 
 
